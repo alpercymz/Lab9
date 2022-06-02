@@ -1,0 +1,45 @@
+import mysql.connector
+dataBase = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="pass1234"
+)
+cursorObject = dataBase.cursor()
+cursorObject.execute("CREATE DATABASE MyNewDatabase")
+connection = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    dataBase='MyNewDatabase',
+    password="pass1234"
+)
+if connection.is_connected():
+        db_Info = connection.get_server_info()
+        print("Connected to MySQL Server version ", db_Info)
+        cursor = connection.cursor()
+        cursor.execute("select database(); ")
+        record = cursor.fetchone()
+        print("You are connected to database ", record)
+try:
+    connection = mysql.connector.connect(host='localhost',
+                                        dataBase='MyNewDatabase',
+                                        user="root",
+                                        password="pass1234")
+    mySql_Create_Table_Query= """CREATE TABLE Marvel(
+                                Id int NOT NULL,
+                                Movie varchar(200) NOT NULL,
+                                Date varchar(200) NOT NULL,
+                                MCU Phase varchar(200) NOT NULL,
+                                )"""
+    cursor = connection.cursor()
+    result= cursor.execute(mySql_Create_Table_Query)
+    print("Marvel table is created successfully")
+    cursor.execute("SHOW TABLES")
+    for table_name in cursor:
+        print(table_name)
+except mysql.connector.Error as error:
+    print("Failed to crate table".format(error))
+finally:
+    if connection.is_connected():
+        cursor.close()
+        connection.close()
+        print("CLOSED")
