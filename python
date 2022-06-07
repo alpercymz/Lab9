@@ -1,45 +1,75 @@
 import mysql.connector
+import csv
+
 dataBase = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="pass1234"
+    passwd="alper123"
 )
+
 cursorObject = dataBase.cursor()
-cursorObject.execute("CREATE DATABASE MyNewDatabase")
 connection = mysql.connector.connect(
     host="localhost",
     user="root",
-    dataBase='MyNewDatabase',
-    password="pass1234"
+    database="marvel",
+    passwd="alper123"
 )
+
 if connection.is_connected():
-        db_Info = connection.get_server_info()
-        print("Connected to MySQL Server version ", db_Info)
-        cursor = connection.cursor()
-        cursor.execute("select database(); ")
-        record = cursor.fetchone()
-        print("You are connected to database ", record)
-try:
-    connection = mysql.connector.connect(host='localhost',
-                                        dataBase='MyNewDatabase',
-                                        user="root",
-                                        password="pass1234")
-    mySql_Create_Table_Query= """CREATE TABLE Marvel(
-                                Id int NOT NULL,
-                                Movie varchar(200) NOT NULL,
-                                Date varchar(200) NOT NULL,
-                                MCU Phase varchar(200) NOT NULL,
-                                )"""
+    db_Info = connection.get_server_info()
+    print("Connected to MySQL Server version ", db_Info)
     cursor = connection.cursor()
-    result= cursor.execute(mySql_Create_Table_Query)
-    print("Marvel table is created successfully")
+    cursor.execute("select database();")
+    record = cursor.fetchone()
+    print("You're connected to database: ", record)
+
+try:
+    connection = mysql.connector.connect(host="localhost",
+                                         user="root",
+                                         database="marvel",
+                                         passwd="alper123")
+    mySql_Create_Table_Query = """CREATE TABLE marvel (ID INT NOT NULL, Movie VARCHAR(200) NOT NULL, Date VARCHAR(200), McuPhase VARCHAR(200), PRIMARY KEY (ID))"""
+    cursor = connection.cursor()
+    result = cursor.execute(mySql_Create_Table_Query)
+    print("Marvel table created successfully")
+
     cursor.execute("SHOW TABLES")
-    for table_name in cursor:
-        print(table_name)
+    for marvel in cursor:
+        print(marvel)
+
 except mysql.connector.Error as error:
-    print("Failed to crate table".format(error))
+    print("Failed to create table in MySQL: {}".format(error))
 finally:
     if connection.is_connected():
         cursor.close()
         connection.close()
-        print("CLOSED")
+        print("MySQL connection is closed")
+def insert_variables_into_table(ID, Movie, Date, McuPhase):
+    try:
+        connection = mysql.connector.connect(host="localhost",
+                                            user="root",
+                                            database="marvel",
+                                             passwd="alper123")
+        cursor = connection.cursor()
+        mySql_insert_query = """"INSERT INTO marvel(ID, Movie, Date, McuPhase)
+                VALUES(%s, %s, %s, %s)"""
+        record = (ID, Movie, Date, McuPhase)
+        cursor.execute(mySql_insert_query, record)
+        connection.commit()
+
+        print(cursor.rowcount, "Record inserted successfully into Marvels table")
+
+        cursor.close()
+    except mysql.connector.Error as error:
+        print("Failed to insert record into Marvels table {}".format(error))
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
+
+with open("C:\\Users\\E\\Documents\\GitHub\\alpercymz\\Lab9\\python\\Marvel.txt") as f:
+    reader = csv.reader(f)
+
+for row in reader:
+    insert_variables_into_table(reader)
